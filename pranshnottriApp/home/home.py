@@ -1,14 +1,11 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask_socketio import join_room, leave_room, send, SocketIO
+from flask_socketio import join_room, leave_room, send
+from .. import socketio
+from . import homeBP
+
 import random
 from string import ascii_uppercase
-
-app = Flask(__name__)
-app.config["SECRET_KEY"] = "aRandomKeyForDevolopment"
-socketio = SocketIO(app)
-
 rooms = {}
-
 
 def generate_unique_code(length):
     while True:
@@ -22,7 +19,7 @@ def generate_unique_code(length):
     return code
 
 
-@app.route("/", methods=["POST", "GET"])
+@homeBP.route("/", methods=["POST", "GET"])
 def home():
     session.clear()
     if request.method == "POST":
@@ -46,20 +43,21 @@ def home():
 
         session["room"] = room
         session["name"] = name
-        return redirect(url_for("room"))
+        return redirect(url_for("homeBP.room"))
 
     return render_template("home.html")
 
 
-@app.route("/room")
+@homeBP.route("/room")
 def room():
     room = session.get("room")
+    name = session.get("name")
     if room is None or session.get("name") is None or room not in rooms:
         return redirect(url_for("home"))
 
     print(f"room {room}")
 
-    return render_template("room.html", code=room, messages=rooms[room]["messages"])
+    return render_template("room.html", code=room, name=name)
 
 
 @socketio.on("connect")
@@ -78,6 +76,7 @@ def connect(auth):
     print(f"{name} joined room {room}")
 
 
+
 @socketio.on("disconnect")
 def disconnect():
     room = session.get("room")
@@ -91,7 +90,3 @@ def disconnect():
 
     send({"name": name, "message": "has left the room"}, to=room)
     print(f"{name} has left the room {room}")
-
-
-if __name__ == "__main__":
-    socketio.run(app, debug=True)
