@@ -1,4 +1,25 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+{% block head %} 
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+	var socket = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
+
+	socket.on('connect', function(){
+		socket.emit('joined', {'msg': 'I have joined'});
+	});
+	socket.on('joined_ack', function(msg) 
+	{
+		num_str = '';
+		num_str = num_str + msg.msg;
+		log_div = document.getElementById('log');
+		log_div.append(num_str);
+		log_div.append("     ")
+	});
+</script>
+{% endblock %}
+{% block content %}
 <h1>Welcome to quiz room</h1>
-<input type="text" rows="3" value="{{name}} has joined" name="message" id="message" />
+<h3 id="disp"></h3>
+<div id="log">
+</div> <!-- /#log -->
 {% endblock %}
