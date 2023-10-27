@@ -5,6 +5,7 @@ from .. quiz_room import QuizRoom
 from .. quiz_room_member import QuizRoomMember
 from datetime import datetime
 
+
 quiz_room_manager_obj = QuizRoomManager()
 
 @home_blueprint.route('/', methods=['GET', 'POST'])
