@@ -12,5 +12,8 @@ def create_app(debug=False):
     from . home import home_blueprint
     app.register_blueprint(home_blueprint)
 
+    from . create_quiz import create_quiz_blueprint
+    app.register_blueprint(create_quiz_blueprint)
+
     socketio.init_app(app)
     return app
