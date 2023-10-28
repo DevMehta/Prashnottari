@@ -40,8 +40,10 @@ def home_view_function():
 		''' handle joining to an existing room '''	
 		if join_option != False:
 			# TO DO: check if the entered room code is valid or not
-			# TO DO: 
-			session['room_code'] = inpt_code
-			return render_template("room.html", name=inpt_user_name)
+			if inpt_code not in quiz_room_manager_obj._room_codes:
+				# TO DO return an error that invalid quiz room code
+			else:
+				session['room_code'] = inpt_code
+				return render_template("room.html", name=inpt_user_name)
 			
 	return render_template("home.html")

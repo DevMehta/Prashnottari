@@ -100,7 +100,4 @@ class QuizRoom:
 		# TO DO: add them to members list
 		pass
 
-	def after_leave_processing():
-		# TO DO: decrement the count of currently active quiz rooms
-		# TO DO: to store the quizRoom end time & date
-		pass
+	

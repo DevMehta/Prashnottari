@@ -72,11 +72,12 @@ class QuizRoomManager:
 		member_list = []
 		member_list.append(session['user_name'])
 		session["room_code"] = new_code
-
+		
 		print(new_code)
-		print(session["room_code"])
-
-
 		new_room = QuizRoom(new_room_id, room_name, member_list, quiz_room_creation_datetime, new_code)
 		QuizRoomManager._room_codes.add(new_room.room_code)
 
+	def after_leave_processing():
+		# TO DO: decrement the count of currently active quiz rooms
+		# TO DO: to store the quizRoom end time & date
+		pass
