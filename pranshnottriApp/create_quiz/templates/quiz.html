@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create Quiz</title>
+</head>
+
+<body>
+    <h1>Quiz</h1>
+    <form method="POST" action="/submit">
+        <label for="quiz_name">Quiz Name:</label>
+        <input type="text" name="quiz_name" required>
+        <div class="question">
+            <h2>Question </h2>
+            <input type="text" name="question" placeholder="Enter your question">
+            <h3>Options</h3>
+            <div class="options">
+                <label><input type="radio" name="correct_answer" value=""> Option </label>
+                <input type="text" name="option" placeholder="Option">
+            </div>
+        </div>
+        <button type="button" onclick="">Add Question</button>
+        <input type="submit" value="Submit Quiz">
+    </form>
+</body>
+
+</html>
