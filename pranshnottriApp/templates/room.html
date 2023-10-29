@@ -4,7 +4,7 @@
 <script type="text/javascript">
 	var socket = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
 
-	socket.on('connect', function(){
+	socket.once('connect', function(){
 		socket.emit('joined', {'msg': 'I have joined'});
 	});
 	socket.on('joined_ack', function(msg) 
@@ -15,6 +15,25 @@
 		log_div.append(num_str);
 		log_div.append("     ")
 	});
+	socket.on('left_room', function(msg) 
+	{
+		num_str = '';
+		num_str = num_str + msg.name + msg.message;
+		log_div = document.getElementById('log');
+		log_div.append(num_str);
+		log_div.append("     ")
+	});
+	function start_quiz_event()
+	{
+		socket.emit('start_quiz');
+		console.log("CALLED Start_quiz")
+	}
+	socket.on('numbers', function(msg_json)
+	{
+		log2 = document.getElementById('log2');
+		log2.innerHTML = "";
+		log2.append(msg_json.num);
+	});
 </script>
 {% endblock %}
 {% block content %}
@@ -22,4 +41,7 @@
 <h3 id="disp"></h3>
 <div id="log">
 </div> <!-- /#log -->
+<button onclick="start_quiz_event()">Start Quiz</button>
+<div id="log2">
+</div> <!-- /#log2 -->
 {% endblock %}

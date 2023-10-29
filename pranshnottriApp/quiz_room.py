@@ -8,6 +8,7 @@
 from datetime import datetime
 import random
 from string import ascii_uppercase
+from flask import session
 
 class QuizRoom:
 	
@@ -93,11 +94,14 @@ class QuizRoom:
 			raise ValueError("room_code has to be string of length 5.")
 		self._room_code = code
 
-	def add_member_to_room():
+	def add_member_to_room(self):
 		# TO DO: store the name of the member
+		name = session['user_name']
 		# TO DO: store their time of latest join
+		join_time = datetime.now()
 		# TO DO: store their time of last leaving
 		# TO DO: add them to members list
+		self._members_lst.append(name.lower())
 		pass
 
 	

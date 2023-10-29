@@ -1,6 +1,8 @@
 from flask import session
 from flask_socketio import join_room, leave_room, send, emit
 from .. import socketio
+from threading import Thread
+import time
 
 
 '''
@@ -25,8 +27,18 @@ def disconnect_event_handler():
     user_name = session.get("user_name")
     leave_room(room_code)
 
+    '''
     if room_code in quiz_room_manager_obj._room_codes:
         quiz_room_manager_obj._room_codes.remove(room_code)
+    '''
 
-    emit({"name": name, "message": "has left the room"}, to=room_code)
-    print(f"{name} has left the room {room}")
+    emit('left_room',{"name": user_name, "message": "has left the room"}, namespace="/quiz_room_namespace", to=room_code)
+    print(f"{user_name} has left the room {room_code}")
+
+@socketio.on("start_quiz", namespace='/quiz_room_namespace')
+def start_quiz_handler():
+    room_code = session.get("room_code")
+    for i in range(100):
+        time.sleep(2)
+        emit('numbers', {'num': i}, namespace='/quiz_room_namespace', to=room_code)
+        print("EMIITED NUM")
