@@ -21,6 +21,8 @@ class QuizRoomManager:
 	_rooms_overall_count = 0 # will keep the count of number of quiz rooms which have been active ever
 	_room_codes = set() # a dictonary which keeps all the quiz_room codes which are currently in use
 	
+	_quiz_room_obj_dict = {}
+
 	@classmethod
 	def set_current_room_cnt(cls, new_cnt):
 		cls._rooms_current_count = new_cnt
@@ -41,6 +43,10 @@ class QuizRoomManager:
 	            break
 
 	    return generated_code
+
+	@classmethod
+	def add_quiz_room_obj(cls, obj):
+		cls._quiz_room_obj_dict[session['room_code']] = obj
 
 	def before_first_join_processing(self):
 		# increment the count of currently active quiz rooms  
@@ -70,13 +76,16 @@ class QuizRoomManager:
 		
 		# add the room owner to the list of members
 		member_list = []
-		member_list.append(session['user_name'])
+		member_list.append(session['user_name'].lower())
 		session["room_code"] = new_code
-
+		
 		print(new_code)
-		print(session["room_code"])
-
-
 		new_room = QuizRoom(new_room_id, room_name, member_list, quiz_room_creation_datetime, new_code)
 		QuizRoomManager._room_codes.add(new_room.room_code)
 
+		return new_room # returns the newly created quiz room object
+
+	def after_leave_processing():
+		# TO DO: decrement the count of currently active quiz rooms
+		# TO DO: to store the quizRoom end time & date
+		pass
