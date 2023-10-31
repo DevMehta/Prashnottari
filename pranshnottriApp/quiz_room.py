@@ -102,6 +102,3 @@ class QuizRoom:
 		# TO DO: store their time of last leaving
 		# TO DO: add them to members list
 		self._members_lst.append(name.lower())
-		pass
-
-	
