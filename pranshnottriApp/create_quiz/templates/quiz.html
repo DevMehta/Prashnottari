@@ -7,21 +7,55 @@
 
 <body>
     <h1>Quiz</h1>
-    <form method="POST" action="/submit">
+    <form method="POST" action="{{ url_for('create_quiz_blueprint.create_quiz_view_function') }}">
         <label for="quiz_name">Quiz Name:</label>
         <input type="text" name="quiz_name" required>
+        {% set Questionid = namespace(value=2001) %}
+        {% for question_num in range(1, question_count + 1) %}
         <div class="question">
-            <h2>Question </h2>
-            <input type="text" name="question" placeholder="Enter your question">
+            <h2>Question {{ question_num }}</h2>
+            {% set Questionid.value = Questionid.value + 1 %}
+            <input type="hidden" name="question_id" value="{{Questionid.value}}">
+            <input type="text" name="question_text" placeholder="Enter your question"
+                value="{{question_num.question_text}}">
             <h3>Options</h3>
             <div class="options">
-                <label><input type="radio" name="correct_answer" value=""> Option </label>
-                <input type="text" name="option" placeholder="Option">
+                {% for option_num in range(1, 5) %}
+                <label> Option{{ option_num }} </label>
+                <input type="text" name="op{{ option_num }}" placeholder="Option" value="{{question_num.option_num }}">
+                {% endfor %}
             </div>
+            <input type="number" name="correct_ans" placeholder="correct_answer" value="{{question_num.correct_ans}}">
         </div>
-        <button type="button" onclick="">Add Question</button>
-        <input type="submit" value="Submit Quiz">
+        {% endfor %}
+        <button type="button" onclick="addQuestion()">Add Question</button>
+        <button name="submit_quiz">Submit Quiz</button>
     </form>
+    <script>
+        var questionCount = {{ question_count }};
+
+        function addQuestion() {
+            questionCount++;
+            var questionDiv = document.createElement("div");
+            questionDiv.classList.add("question");
+            questionDiv.innerHTML = `
+        <h2>Question ${questionCount}</h2>
+        <input type="text" name="question${questionCount}" placeholder="Enter your question">
+        <h3>Options</h3>
+        <div class="options">
+            <label><input type="radio" name="correct_answer${questionCount}" value="0"> Option 1</label>
+            <input type="text" name="option${questionCount}_1" placeholder="Option 1">
+            <label><input type="radio" name="correct_answer${questionCount}" value="1"> Option 2</label>
+            <input type="text" name="option${questionCount}_2" placeholder="Option 2">
+            <label><input type="radio" name="correct_answer${questionCount}" value="2"> Option 3</label>
+            <input type="text" name="option${questionCount}_3" placeholder="Option 3">
+            <label><input type="radio" name="correct_answer${questionCount}" value="3"> Option 4</label>
+            <input type="text" name="option${questionCount}_4" placeholder="Option 4">
+        </div>
+    `;
+            document.querySelector("form").appendChild(questionDiv);
+        }
+    </script>
 </body>
 
 </html>

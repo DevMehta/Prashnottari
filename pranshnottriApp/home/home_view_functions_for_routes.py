@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, flash
+from flask import render_template, request, session, redirect, url_for, flash, redirect
 from . import home_blueprint
 from .. quiz_room_manager import QuizRoomManager
 from .. quiz_room import QuizRoom
@@ -10,13 +10,21 @@ quiz_room_manager_obj = QuizRoomManager()
 @home_blueprint.route('/', methods=['GET', 'POST'])
 def home_view_function():
 	if request.method == 'POST':
-		inpt_user_name = request.form.get("user-name-inpt")
-		disp_room_name = request.form.get("room-name-inpt")
-		inpt_code = request.form.get("code-inpt")
+		inpt_user_name = str(request.form.get("user-name-inpt")).strip()
+		disp_room_name = str(request.form.get("room-name-inpt")).strip()
+		inpt_code = str(request.form.get("code-inpt")).strip()
 		join_option = request.form.get("join-btn", False)
 		create_option = request.form.get("create-btn", False)
-		print("CO",create_option)
-		print("JO",join_option)
+		create_quiz_option = request.form.get("create-quiz-btn", False)
+
+		if create_quiz_option != False:
+			return redirect(url_for('create_quiz_blueprint.create_quiz_view_function'))
+
+		# check if user name has been entered or not
+		if inpt_user_name == "":
+			flash("Enter a user name.")
+			return render_template("home.html")
+
 		session['user_name'] = inpt_user_name
 
 		# Create the member object
@@ -25,26 +33,36 @@ def home_view_function():
 		memb_role = ""
 		if create_option == False:
 			memb_role = "non-creator"
+			session["user_role"] = "non-creator"
 		else:
 			memb_role = "creator"
+			session["user_role"] = "creator"
 
 		memb_obj = QuizRoomMember(memb_join_time, memb_name, memb_role)
 
 
 		''' handle new room creation '''
 		if create_option != False:
+			# check if room name has been entered or not
+			if disp_room_name == "":
+				flash("Enter a room name.")
+				return render_template("home.html")
 			session['disp_room_name'] = disp_room_name
 			quiz_room_obj = quiz_room_manager_obj.before_first_join_processing()
 			quiz_room_manager_obj.add_quiz_room_obj(quiz_room_obj)
 			print(quiz_room_manager_obj._room_codes)
 			print(quiz_room_manager_obj._rooms_current_count)
-			return render_template("room.html", name=inpt_user_name)
-
+			return redirect(url_for('home_blueprint.quiz_room_view_function'))
+			
 		''' handle joining to an existing room '''	
 		if join_option != False:
-			# TO DO: check if the entered room code is valid or not
+			# Check if room code is an empty string
+			if inpt_code == "":
+				flash("Enter a room code.")
+				return render_template("home.html")
+			# check if the entered room code is valid or not
 			if inpt_code not in quiz_room_manager_obj._room_codes:
-				# TO DO return an error that invalid quiz room code
+				# return an error that invalid quiz room code entered
 				flash("Invalid room code entered.")
 				print(quiz_room_manager_obj._room_codes)
 				return render_template("home.html", name=inpt_user_name)
@@ -57,15 +75,20 @@ def home_view_function():
 					print(quiz_room_manager_obj._room_codes)
 					return render_template("home.html", name=inpt_user_name)
 				else:
+					session['disp_room_name'] = quiz_room_obj._room_name
 					quiz_room_obj.add_member_to_room()
 					print(quiz_room_obj._members_lst)
 					print(quiz_room_manager_obj._room_codes)
-				return render_template("room.html", name=inpt_user_name)
+				return redirect(url_for('home_blueprint.quiz_room_view_function'))
 
 		print(quiz_room_manager_obj._room_codes)		
 	return render_template("home.html")
 
-
+@home_blueprint.route('/quiz_room', methods=['GET', 'POST'])
+def quiz_room_view_function():
+	# show a list of existing quizzes to
+	# show the option to create the new quiz 
+	return render_template("room.html")
 
 @home_blueprint.route('/quiz_run', methods=['GET', 'POST'])
 def quiz_run_view_function():

@@ -25,22 +25,3 @@ def close_db_connection(e=None):
 
     if db_connection is not None:
         db_connection.close()
-
-'''        
-# Test the connection
-try:
-    with engine.connect() as connection:
-        print("Connected to the database")
-except Exception as e:
-    print(f"Connection error: {e}")
-
-from sqlalchemy import text
-
-# SQL SELECT query
-query = text("SELECT * FROM BRANCH")
-
-with engine.connect() as connection:
-    result = connection.execute(query)
-    for row in result:
-        print(row)
-'''

@@ -10,11 +10,10 @@ Event handler for the event of creating a new quiz room.
 A room is always assigned to each of the client when they connect
 but other processing which completes room creation from business logic 
 point of view has to be done here.
-Namespace: quiz_room
+Namespace: quiz_room_namespace
 '''
 @socketio.on("joined", namespace="/quiz_room_namespace")
 def join_quiz_room_handler(data):
-    print(data['msg'])
     room_code = session.get('room_code')
     user_name = session.get('user_name')
     join_room(room_code)
@@ -38,7 +37,6 @@ def disconnect_event_handler():
 @socketio.on("start_quiz", namespace='/quiz_room_namespace')
 def start_quiz_handler():
     room_code = session.get("room_code")
-    for i in range(100):
-        time.sleep(2)
-        emit('numbers', {'num': i}, namespace='/quiz_room_namespace', to=room_code)
-        print("EMIITED NUM")
+    for i in range(60, -1, -1):
+        time.sleep(1)
+        emit('before_start_timer', {'time': i}, namespace='/quiz_room_namespace', to=room_code)

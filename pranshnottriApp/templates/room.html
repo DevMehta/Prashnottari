@@ -25,23 +25,27 @@
 	});
 	function start_quiz_event()
 	{
+		start_quiz_btn = document.getElementById("start_quiz_btn");
+		start_quiz_btn.style.display = "none";
 		socket.emit('start_quiz');
-		console.log("CALLED Start_quiz")
 	}
-	socket.on('numbers', function(msg_json)
+	socket.on('before_start_timer', function(msg_json)
 	{
-		log2 = document.getElementById('log2');
+		log2 = document.getElementById('before_start_timer_div');
 		log2.innerHTML = "";
-		log2.append(msg_json.num);
+		log2.append("The quiz starts in: "  + msg_json.time + " seconds");
 	});
 </script>
 {% endblock %}
 {% block content %}
-<h1>Welcome to quiz room</h1>
+<h1>Welcome to quiz room: {{ session['disp_room_name'] }}</h1>
+<h3>Share this code with others to join the room: {{ session['room_code'] }}</h3>
 <h3 id="disp"></h3>
 <div id="log">
 </div> <!-- /#log -->
-<button onclick="start_quiz_event()">Start Quiz</button>
-<div id="log2">
-</div> <!-- /#log2 -->
+{% if 'creator' == session['user_role'] %}
+	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
+{% endif %}
+<div id="before_start_timer_div">
+</div> <!-- /#before_start_timer_div-->
 {% endblock %}
