@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+	var socket_quiz_run_ns = io.connect("http://127.0.0.1:5000" + '/quiz_run_namespace');
+	socket_quiz_run_ns.on('connect', function (msg) 
+	{
+		socket_quiz_run_ns.emit('request_questions', {'quiz_id' : '1002'});
+	});
+	socket_quiz_run_ns.on('evnt1', function(msg) 
+	{
+		log_div = document.getElementById("log");
+		log_div.append=msg.msg;
+	});
+</script>
+<h1>Quiz Name ----</h1>
+<div id="log">
+	
+</div>
+{% endblock %}

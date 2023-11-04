@@ -6,14 +6,16 @@
 
 from datetime import datetime
 
-class quiz:
-	def __init__(self, ):
+class Quiz:
+	_quiz_obj_dict = {}
+	
+	def __init__(self, quiz_id, quiz_name, quiz_category, quiz_creation_date, number_of_times_played):
 		# instance attributes	
-		self._quiz_id
-		self._quiz_name
-		self._quiz_category
-		self._quiz_creation_date
-		self._number_of_times_played
+		self._quiz_id = quiz_id
+		self._quiz_name = quiz_name
+		self._quiz_category = quiz_category
+		self._quiz_creation_date = quiz_creation_date
+		self._number_of_times_played = number_of_times_played
 
 	@property
 	def quiz_id(self):
@@ -61,13 +63,13 @@ class quiz:
 		self._quiz_creation_date = quiz_creation_date_inpt
 			
 
-		@property
+	@property
 	def number_of_times_played(self):
 		return self._number_of_times_played
 	@number_of_times_played.setter
 	def number_of_times_played(self, number_of_times_played_inpt):
 		try:
-			self._number_of_times_played = str(number_of_times_played_inpt)
+			self._number_of_times_played = int(number_of_times_played_inpt)
 		except ValueError:
 			raise ValueError("number_of_times_played has to be a integer.")
 		self._number_of_times_played = number_of_times_played_inpt

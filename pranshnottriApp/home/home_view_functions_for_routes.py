@@ -3,7 +3,13 @@ from . import home_blueprint
 from .. quiz_room_manager import QuizRoomManager
 from .. quiz_room import QuizRoom
 from .. quiz_room_member import QuizRoomMember
+from .. quiz import Quiz
+from .. quiz_question import QuizQuestion
 from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
+from .. db import get_db_connection, close_db_connection
+
 
 quiz_room_manager_obj = QuizRoomManager()
 
@@ -18,7 +24,7 @@ def home_view_function():
 		create_quiz_option = request.form.get("create-quiz-btn", False)
 
 		if create_quiz_option != False:
-			return redirect(url_for('create_quiz_blueprint.create_quiz_view_function'))
+			return redirect(url_for('create_quiz_blueprint.create_quiz_function'))
 
 		# check if user name has been entered or not
 		if inpt_user_name == "":
@@ -87,9 +93,58 @@ def home_view_function():
 @home_blueprint.route('/quiz_room', methods=['GET', 'POST'])
 def quiz_room_view_function():
 	# show a list of existing quizzes to
-	# show the option to create the new quiz 
-	return render_template("room.html")
+	if request.method == 'POST':
+		inpt_quiz_id = '1001'
+		# get the quiz from the db
+		conn = get_db_connection()
+		get_quiz_query = "SELECT * FROM quiz WHERE quiz_id = ( %s );" % (inpt_quiz_id)
+		sql_rest = None
+		try:
+			sql_rest = conn.execute(text(get_quiz_query))
+		except SQLAlchemyError as e:
+			print(e)
+			
+		row = sql_rest.fetchone()
+		qid = row[0]
+		qname = row[1]
+		qcateg = row[2]
+		qcdate = row[3]
+		qntmes_played = row[4]
+		session['quiz_name'] = qname
+		session['quiz_id'] = qid
+		conn.commit()
+		
+		# make the quiz object
+		quiz_obj = Quiz(qid, qname, qcateg, qcdate, qntmes_played)
+		Quiz._quiz_obj_dict['1001'] = quiz_obj
+		print(quiz_obj.__str__())
+		
+		# get quiz questions
+		get_quiz_ques_query = "SELECT * FROM quiz_question WHERE quiz_id = ( %s );" % (inpt_quiz_id)
+		sql_rest2 = None
+		try:
+			sql_rest2 = conn.execute(text(get_quiz_ques_query))
+		except SQLAlchemyError as e:
+			print(e)
 
-@home_blueprint.route('/quiz_run', methods=['GET', 'POST'])
-def quiz_run_view_function():
-	pass
+		questions_recd = sql_rest2.fetchall()
+		ques_lst = []
+		for recd in questions_recd:
+			print(recd)
+			q_id = str(recd[0])
+			ques_id = str(recd[1])
+			op1 = recd[2]
+			op2 = recd[3]
+			op3 = recd[4]
+			op4 = recd[5]
+			correct_ans = recd[6]
+			ques_txt = recd[7]
+			quiz_ques_obj = QuizQuestion(q_id, ques_id, op1, op2, op3, op4, correct_ans, ques_txt)
+			ques_lst.append(quiz_ques_obj)
+
+		QuizQuestion._quiz_question_obj_dict['1001'] = ques_lst
+
+		close_db_connection()
+
+
+	return render_template("room.html")
