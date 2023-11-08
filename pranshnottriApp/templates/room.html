@@ -49,6 +49,7 @@
 		log2 = document.getElementById('before_start_timer_div');
 		log2.innerHTML = "";
 		question_show_div = document.getElementById('question-show-div');
+		question_show_div.hidden = false;
 		question_label = document.getElementById('ques-text-label');
 		question_label.innerHTML = q_text;
 		op1_inpt = document.getElementById('op1');
@@ -86,13 +87,14 @@
 <div id="log">
 </div> <!-- /#log -->
 {% if 'creator' == session['user_role'] %}
-<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
+<!---<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
 	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
-</form>
+</form>-->
+	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
 {% endif %}
 <div id="before_start_timer_div">
 </div> <!-- /#before_start_timer_div-->
-<div id="question-show-div">
+<div id="question-show-div" hidden="true">
 	<form>
 		<br>
 		<label id="ques-text-label"></label><br>

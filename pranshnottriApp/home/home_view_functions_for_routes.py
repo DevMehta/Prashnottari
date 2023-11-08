@@ -146,5 +146,4 @@ def quiz_room_view_function():
 
 		close_db_connection()
 
-
 	return render_template("room.html")
