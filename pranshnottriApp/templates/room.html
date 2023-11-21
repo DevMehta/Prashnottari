@@ -77,6 +77,17 @@
 		quiz_timer_div = document.getElementById('quiz_timer_div');
 		quiz_timer_div.innerHTML = "";
 		quiz_timer_div.append(msg_json.time + " seconds left.");
+		if(msg_json.time == 0)
+		{
+			var radio_btns = document.getElementsByName('mcq-op');
+			for (let radio of radio_btns)
+			{
+				if(radio.checked)
+				{
+					socket_quiz_room_ns.emit('resp_evnt', {'resp': radio.id});
+				}
+			}
+		}
 	});
 </script>
 {% endblock %}

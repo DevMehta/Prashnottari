@@ -129,3 +129,7 @@ def set_up_question(app_cntxt, req_cntxt):
         QuizQuestion._quiz_question_obj_dict['1001'] = ques_lst
 
         close_db_connection()
+
+@socketio.on("resp_evnt", namespace="/quiz_room_namespace")
+def resp_handler(data):
+    print(data['resp'])
