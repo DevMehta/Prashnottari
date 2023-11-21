@@ -94,72 +94,16 @@ def home_view_function():
 
 @home_blueprint.route('/quiz_room', methods=['GET', 'POST'])
 def quiz_room_view_function():
-    # show a list of existing quizzes to
-    conn = get_db_connection()
-    get_quizzes = "SELECT quiz_id, quiz_name FROM quiz"
-    sql_rest = None
-    try:
-        sql_rest = conn.execute(text(get_quizzes))
-    except SQLAlchemyError as e:
-        print(e)
-    close_db_connection()
-    quiz_list = sql_rest.fetchall()
-    print(quiz_list)
-
-    if request.method == 'POST':
-        inpt_quiz_id = '1001'
-        # get the quiz from the db
-        conn = get_db_connection()
-        get_quiz_query = "SELECT * FROM quiz WHERE quiz_id = ( %s );" % (
-            inpt_quiz_id)
-        sql_rest = None
-        try:
-            sql_rest = conn.execute(text(get_quiz_query))
-        except SQLAlchemyError as e:
-            print(e)
-
-        row = sql_rest.fetchone()
-        qid = row[0]
-        qname = row[1]
-        qcateg = row[2]
-        qcdate = row[3]
-        qntmes_played = row[4]
-        session['quiz_name'] = qname
-        session['quiz_id'] = qid
-        conn.commit()
-
-        # make the quiz object
-        quiz_obj = Quiz(qid, qname, qcateg, qcdate, qntmes_played)
-        Quiz._quiz_obj_dict['1001'] = quiz_obj
-        print(quiz_obj.__str__())
-
-        # get quiz questions
-        get_quiz_ques_query = "SELECT * FROM quiz_question WHERE quiz_id = ( %s );" % (
-            inpt_quiz_id)
-        sql_rest2 = None
-        try:
-            sql_rest2 = conn.execute(text(get_quiz_ques_query))
-        except SQLAlchemyError as e:
-            print(e)
-
-        questions_recd = sql_rest2.fetchall()
-        ques_lst = []
-        for recd in questions_recd:
-            print(recd)
-            q_id = str(recd[0])
-            ques_id = str(recd[1])
-            op1 = recd[2]
-            op2 = recd[3]
-            op3 = recd[4]
-            op4 = recd[5]
-            correct_ans = recd[6]
-            ques_txt = recd[7]
-            quiz_ques_obj = QuizQuestion(
-                q_id, ques_id, op1, op2, op3, op4, correct_ans, ques_txt)
-            ques_lst.append(quiz_ques_obj)
-
-        QuizQuestion._quiz_question_obj_dict['1001'] = ques_lst
-
-        close_db_connection()
-
-    return render_template("room.html", quiz_list=quiz_list)
+	# show a list of existing quizzes to users
+	conn = get_db_connection()
+	get_quizzes = "SELECT quiz_id, quiz_name FROM quiz;"
+	sql_rest = None
+	try:
+		sql_rest = conn.execute(text(get_quizzes))
+	except SQLAlchemyError as e:
+		print(e)
+	close_db_connection()
+	quiz_list = sql_rest.fetchall()
+	print(quiz_list)
+	
+	return render_template("room.html", quiz_list=quiz_list)

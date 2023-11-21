@@ -39,9 +39,11 @@ def disconnect_event_handler():
     print(f"{user_name} has left the room {room_code}")
 
 @socketio.on("start_quiz_btn_evnt", namespace='/quiz_room_namespace')
-def start_quiz_handler():
+def start_quiz_handler(data):
+    quiz_id = str(data['inpt_quiz_id'])
+    print("QUIZ ID" + quiz_id)
     room_code = session.get("room_code")
-    quiz_set_up = socketio.start_background_task(set_up_question, current_app.app_context(), current_app.test_request_context())
+    quiz_set_up = socketio.start_background_task(set_up_question, current_app.app_context(), current_app.test_request_context(), quiz_id)
     for i in range(10, -1, -1):
         emit('before_start_timer', {'time': i}, namespace='/quiz_room_namespace', to=room_code)
         #time.sleep(1)
@@ -50,7 +52,7 @@ def start_quiz_handler():
     quiz_set_up.join()
         
     #quiz_id = session.get('quiz_id')
-    quiz_id = '1001'
+    
 
     quiz_ques_lst = QuizQuestion._quiz_question_obj_dict[quiz_id]
     for i in range(len(quiz_ques_lst)):
@@ -75,9 +77,9 @@ def quiz_timer_func(room_code, app_cntxt):
             #time.sleep(1)
             socketio.sleep(1)
 
-def set_up_question(app_cntxt, req_cntxt):
+def set_up_question(app_cntxt, req_cntxt, quiz_id_inpt):
     with app_cntxt:
-        inpt_quiz_id = '1001'
+        inpt_quiz_id = quiz_id_inpt
         # get the quiz from the db
         conn = get_db_connection()
         get_quiz_query = "SELECT * FROM quiz WHERE quiz_id = ( %s );" % (inpt_quiz_id)
@@ -100,7 +102,7 @@ def set_up_question(app_cntxt, req_cntxt):
         
         # make the quiz object
         quiz_obj = Quiz(qid, qname, qcateg, qcdate, qntmes_played)
-        Quiz._quiz_obj_dict['1001'] = quiz_obj
+        Quiz._quiz_obj_dict[quiz_id_inpt] = quiz_obj
         print(quiz_obj.__str__())
         
         # get quiz questions
@@ -126,7 +128,7 @@ def set_up_question(app_cntxt, req_cntxt):
             quiz_ques_obj = QuizQuestion(q_id, ques_id, op1, op2, op3, op4, correct_ans, ques_txt)
             ques_lst.append(quiz_ques_obj)
 
-        QuizQuestion._quiz_question_obj_dict['1001'] = ques_lst
+        QuizQuestion._quiz_question_obj_dict[quiz_id_inpt] = ques_lst
 
         close_db_connection()
 

@@ -25,9 +25,9 @@
 		var e = document.getElementById("quiz_name");
 		var value = e.options[e.selectedIndex].id;
 		console.log(value);
-		start_quiz_btn = document.getElementById("start_quiz_btn");
-		start_quiz_btn.style.display = "none";
-		socket_quiz_room_ns.emit('start_quiz_btn_evnt');
+		select_quiz_div = document.getElementById("select_quiz_div");
+		select_quiz_div.style.display = "none";
+		socket_quiz_room_ns.emit('start_quiz_btn_evnt', {"inpt_quiz_id": value});
 	}
 	socket_quiz_room_ns.on('before_start_timer', function (msg_json) {
 		log2 = document.getElementById('before_start_timer_div');
@@ -94,15 +94,15 @@
 <!---<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
 	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
 </form>-->
-<div id="select_quiz">
-	<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
+<div id="select_quiz_div">
+	<!--<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">-->
 		<select name="quiz_name" id="quiz_name">
 			{% for quiz in quiz_list %}
-			<option id="{{ quiz[0] }}" value="{{ quiz[1] }}">{{ quiz[1] }}</option>
+			<option id="{{ quiz[0] }}" value="{{ quiz[0] }}">{{ quiz[1] }}</option>
 			{% endfor %}
 		</select>
 		<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
-	</form>
+	<!--</form>-->
 </div>
 {% endif %}
 <div id="before_start_timer_div">

@@ -3,7 +3,7 @@ from flask import g
 
 # Replace 'username', 'password', 'hostname', and 'database_name' with your MySQL credentials
 username = 'root'
-password = 'Myql5432!'
+password = 'MySQLRoot23'
 hostname = 'localhost'  # Typically 'localhost' for local MySQL server
 database_name = 'ptori_app_db'
 
