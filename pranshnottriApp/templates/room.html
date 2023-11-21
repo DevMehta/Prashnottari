@@ -1,46 +1,43 @@
 {% extends 'base.html' %}
-{% block head %} 
+{% block head %}
 <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
 <script type="text/javascript">
 	var socket_quiz_room_ns = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
 
-	socket_quiz_room_ns.once('connect', function(){
-		socket_quiz_room_ns.emit('joined', {'msg': 'I have joined'});
+	socket_quiz_room_ns.once('connect', function () {
+		socket_quiz_room_ns.emit('joined', { 'msg': 'I have joined' });
 	});
-	socket_quiz_room_ns.on('joined_ack', function(msg) 
-	{
+	socket_quiz_room_ns.on('joined_ack', function (msg) {
 		num_str = '';
 		num_str = num_str + msg.msg;
 		log_div = document.getElementById('log');
 		log_div.append(num_str);
 		log_div.append("     ")
 	});
-	socket_quiz_room_ns.on('left_room', function(msg) 
-	{
+	socket_quiz_room_ns.on('left_room', function (msg) {
 		num_str = '';
 		num_str = num_str + msg.name + msg.message;
 		log_div = document.getElementById('log');
 		log_div.append(num_str);
 		log_div.append("     ")
 	});
-	function start_quiz_event()
-	{
+	function start_quiz_event() {
+		var e = document.getElementById("quiz_name");
+		var value = e.options[e.selectedIndex].id;
+		console.log(value);
 		start_quiz_btn = document.getElementById("start_quiz_btn");
 		start_quiz_btn.style.display = "none";
 		socket_quiz_room_ns.emit('start_quiz_btn_evnt');
 	}
-	socket_quiz_room_ns.on('before_start_timer', function(msg_json)
-	{
+	socket_quiz_room_ns.on('before_start_timer', function (msg_json) {
 		log2 = document.getElementById('before_start_timer_div');
 		log2.innerHTML = "";
-		log2.append("The quiz starts in: "  + msg_json.time + " seconds");
+		log2.append("The quiz starts in: " + msg_json.time + " seconds");
 	});
-	socket_quiz_room_ns.on('disconnect', function (msg) 
-	{
-		socket_quiz_room_ns.emit('disconnect', {'msg': 'I have left the room'});
+	socket_quiz_room_ns.on('disconnect', function (msg) {
+		socket_quiz_room_ns.emit('disconnect', { 'msg': 'I have left the room' });
 	});
-	socket_quiz_room_ns.on('show_ques', function (msg)
-	{
+	socket_quiz_room_ns.on('show_ques', function (msg) {
 		q_text = msg.ques_txt;
 		op1 = msg.op1;
 		op2 = msg.op2;
@@ -56,35 +53,31 @@
 		op1_inpt.value = op1;
 		op1_label = document.getElementById('op1-label');
 		op1_label.innerHTML = op1;
-		
+
 		op2_inpt = document.getElementById('op2');
 		op2_inpt.value = op2;
 		op2_label = document.getElementById('op2-label');
 		op2_label.innerHTML = op2;
-		
+
 		op3_inpt = document.getElementById('op3');
 		op3_inpt.value = op3;
 		op3_label = document.getElementById('op3-label');
 		op3_label.innerHTML = op3;
-		
+
 		op4_inpt = document.getElementById('op4');
 		op4_inpt.value = op4;
 		op4_label = document.getElementById('op4-label');
 		op4_label.innerHTML = op4;
 	});
-	socket_quiz_room_ns.on('quiz_timer', function(msg_json)
-	{
+	socket_quiz_room_ns.on('quiz_timer', function (msg_json) {
 		quiz_timer_div = document.getElementById('quiz_timer_div');
 		quiz_timer_div.innerHTML = "";
 		quiz_timer_div.append(msg_json.time + " seconds left.");
-		if(msg_json.time == 0)
-		{
+		if (msg_json.time == 0) {
 			var radio_btns = document.getElementsByName('mcq-op');
-			for (let radio of radio_btns)
-			{
-				if(radio.checked)
-				{
-					socket_quiz_room_ns.emit('resp_evnt', {'resp': radio.id});
+			for (let radio of radio_btns) {
+				if (radio.checked) {
+					socket_quiz_room_ns.emit('resp_evnt', { 'resp': radio.id });
 				}
 			}
 		}
@@ -101,7 +94,16 @@
 <!---<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
 	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
 </form>-->
-	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
+<div id="select_quiz">
+	<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
+		<select name="quiz_name" id="quiz_name">
+			{% for quiz in quiz_list %}
+			<option id="{{ quiz[0] }}" value="{{ quiz[1] }}">{{ quiz[1] }}</option>
+			{% endfor %}
+		</select>
+		<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
+	</form>
+</div>
 {% endif %}
 <div id="before_start_timer_div">
 </div> <!-- /#before_start_timer_div-->
@@ -110,13 +112,13 @@
 		<br>
 		<label id="ques-text-label"></label><br>
 		<input type="radio" name="mcq-op" id="op1" value="">
-		<label id = "op1-label" for="op1"></label><br>
+		<label id="op1-label" for="op1"></label><br>
 		<input type="radio" name="mcq-op" id="op2" value="">
-		<label id = "op2-label" for="op2"></label><br>
+		<label id="op2-label" for="op2"></label><br>
 		<input type="radio" name="mcq-op" id="op3" value="">
-		<label id = "op3-label" for="op3"></label><br>
+		<label id="op3-label" for="op3"></label><br>
 		<input type="radio" name="mcq-op" id="op4" value="">
-		<label id = "op4-label" for="op4"></label><br>
+		<label id="op4-label" for="op4"></label><br>
 	</form>
 </div><!-- /#question_show_div -->
 <br>
