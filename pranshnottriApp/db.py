@@ -3,13 +3,15 @@ from flask import g
 
 # Replace 'username', 'password', 'hostname', and 'database_name' with your MySQL credentials
 username = 'root'
-password = 'MySQLRoot23'
+password = 'Myql5432!'
 hostname = 'localhost'  # Typically 'localhost' for local MySQL server
 database_name = 'ptori_app_db'
 
-def  get_db_connection():
-# Create a connection string
-    connection_string = f'mysql+mysqlconnector://' + username + ':' + password + '@' + hostname + '/' + database_name
+
+def get_db_connection():
+    # Create a connection string
+    connection_string = f'mysql+mysqlconnector://' + username + \
+        ':' + password + '@' + hostname + '/' + database_name
     # create engine
     engine = create_engine(connection_string)
 
@@ -19,6 +21,7 @@ def  get_db_connection():
 
     # return the connection
     return g.db_connection
+
 
 def close_db_connection(e=None):
     db_connection = g.pop('db_connection', None)

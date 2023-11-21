@@ -1,5 +1,6 @@
 from flask import render_template, request, session, redirect, url_for, flash
 from . import create_quiz_blueprint
+from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
 from sqlalchemy import text
@@ -15,14 +16,15 @@ def create_quiz_function():
             try:
                 user_name = session['user_name']
                 quiz_name = request.form['quiz_name']
+                quiz_category = request.form['quiz_category']
                 conn = get_db_connection()
                 query_count_quizID = "Select count(*) from quiz"
                 resp = conn.execute(text(query_count_quizID))
 
                 quiz_id = int(resp.scalar()) + 1001
-                columns = "quiz_id, username, quiz_topic"
-                values = str("'" + str(quiz_id) + "' , '" +
-                             str(user_name) + "', '" + str(quiz_name) + "'")
+                columns = "quiz_id, quiz_name, category, quiz_creation_date, no_of_times_played"
+                values = str("'" + str(quiz_id) + "' , '" + str(quiz_name) + "' , '" + str(
+                    quiz_category) + "' , '" + str(datetime.now()) + "' , '" + str(0) + "'")
                 query_insert_quiz = "INSERT INTO %s ( %s ) VALUES ( %s );" % (
                     'quiz', columns, values)
 
