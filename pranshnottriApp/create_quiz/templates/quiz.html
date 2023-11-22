@@ -29,7 +29,8 @@
                     {% endfor %}
                 </div>
                 <label> Correct Answer: </label>
-                <input type="number" name="correct_ans" placeholder="correct_answer" value="{{Object.correct_ans}}">
+                <input type="number" name="correct_ans" placeholder="correct_answer" value="{{Object.correct_ans}}"
+                    min="1" max="4">
             </div>
             {% endfor %}
         </div>
