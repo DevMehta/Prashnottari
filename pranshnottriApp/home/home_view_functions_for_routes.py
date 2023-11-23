@@ -76,6 +76,10 @@ def home_view_function():
             else:
                 session['room_code'] = inpt_code
                 quiz_room_obj = quiz_room_manager_obj._quiz_room_obj_dict[session['room_code']]
+                if quiz_room_obj._quiz_run_bool == True:
+                    flash(
+                        "The quiz has been started you cannot enter the room now.")
+                    return render_template("home.html", name=inpt_user_name)
                 if inpt_user_name[0].lower() in quiz_room_obj._members_dict.values():
                     flash(
                         "The user name has been taken by other member of the room, Enter another")

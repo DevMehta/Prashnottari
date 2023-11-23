@@ -4,10 +4,12 @@
 <script type="text/javascript">
 	var socket_quiz_room_ns = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
 
+	/*
 	socket_quiz_room_ns.once('connect', function () 
 	{
 		socket_quiz_room_ns.emit('joined', { 'msg': 'I have joined' });
 	});
+	*/
 	socket_quiz_room_ns.on('joined_ack', function (msg) 
 	{
 		num_str = '';

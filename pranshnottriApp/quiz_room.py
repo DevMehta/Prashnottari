@@ -11,7 +11,7 @@ from string import ascii_uppercase
 from flask import session
 
 class QuizRoom:
-	def __init__(self, room_id, room_name, members_dict, room_creation_time, room_code, runs_dict_inpt, currnt_run_id_inpt, room_end_time=None):
+	def __init__(self, room_id, room_name, members_dict, room_creation_time, room_code, runs_dict_inpt, currnt_run_id_inpt, quiz_run_bool_inpt = False, room_end_time=None):
 		# instance attributes	
 		self._room_id = room_id
 		self._room_name = room_name # user given name
@@ -21,6 +21,7 @@ class QuizRoom:
 		self._room_code = room_code
 		self._runs_dict = runs_dict_inpt # consist of quiz_run_objs with run_ids as keys
 		self._currnt_run_id = currnt_run_id_inpt
+		self._quiz_run_bool = quiz_run_bool_inpt
 
 	@property
 	def room_id(self):
@@ -56,7 +57,7 @@ class QuizRoom:
 	@members_dict.setter
 	def members_dict(self, members_dict_inpt):
 		try:
-			self._members_dict = dict(members_lst_dict)
+			self._members_dict = dict(members_dict_inpt)
 		except ValueError:
 			raise ValueError("members_dict has to be of dict type.")
 		self._members_dict = members_dict_inpt
@@ -117,6 +118,17 @@ class QuizRoom:
 		except ValueError:
 			raise ValueError("currnt_run_id has to be a string.")
 		self._currnt_run_id = currnt_run_id_inpt
+
+	@property
+	def quiz_run_bool(self):
+		return self._quiz_run_bool
+	@quiz_run_bool.setter
+	def quiz_run_bool(self, quiz_run_bool_inpt):
+		try:
+			self._quiz_run_bool = dict(quiz_run_bool_inpt)
+		except ValueError:
+			raise ValueError("quiz_run_bool has to be of dict type.")
+		self._quiz_run_bool = quiz_run_bool_inpt
 
 	def add_member_to_room(self, memb_name, memb_id, memb_session_id):
 		# TO DO: store the name of the member
