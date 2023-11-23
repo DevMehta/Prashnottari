@@ -33,6 +33,7 @@ def home_view_function():
             return render_template("home.html")
 
         session['user_name'] = inpt_user_name
+        memb_session_id = None
 
         # Create the member object
         memb_id = str(uuid.uuid4())
@@ -57,7 +58,7 @@ def home_view_function():
                 flash("Enter a room name.")
                 return render_template("home.html")
             session['disp_room_name'] = disp_room_name
-            quiz_room_obj = quiz_room_manager_obj.before_first_join_processing(memb_id)
+            quiz_room_obj = quiz_room_manager_obj.before_first_join_processing(memb_id, memb_session_id)
             quiz_room_manager_obj.add_quiz_room_obj(quiz_room_obj)
             return redirect(url_for('home_blueprint.quiz_room_view_function'))
 
@@ -75,13 +76,13 @@ def home_view_function():
             else:
                 session['room_code'] = inpt_code
                 quiz_room_obj = quiz_room_manager_obj._quiz_room_obj_dict[session['room_code']]
-                if inpt_user_name.lower() in quiz_room_obj._members_dict.values():
+                if inpt_user_name[0].lower() in quiz_room_obj._members_dict.values():
                     flash(
                         "The user name has been taken by other member of the room, Enter another")
                     return render_template("home.html", name=inpt_user_name)
                 else:
                     session['disp_room_name'] = quiz_room_obj._room_name
-                    quiz_room_obj.add_member_to_room(memb_name, memb_id)
+                    quiz_room_obj.add_member_to_room(memb_name, memb_id, memb_session_id)
                 return redirect(url_for('home_blueprint.quiz_room_view_function'))
 
     return render_template("home.html")

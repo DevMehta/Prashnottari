@@ -15,7 +15,7 @@ class QuizRoom:
 		# instance attributes	
 		self._room_id = room_id
 		self._room_name = room_name # user given name
-		self._members_dict = members_dict # key memb_id and value as name
+		self._members_dict = members_dict # key memb_id and value as [name, session_id]
 		self._room_creation_time = room_creation_time
 		self._room_end_time = room_end_time
 		self._room_code = room_code
@@ -118,10 +118,10 @@ class QuizRoom:
 			raise ValueError("currnt_run_id has to be a string.")
 		self._currnt_run_id = currnt_run_id_inpt
 
-	def add_member_to_room(self, memb_name, memb_id):
+	def add_member_to_room(self, memb_name, memb_id, memb_session_id):
 		# TO DO: store the name of the member
 		# TO DO: store their time of latest join
 		join_time = datetime.now()
 		# TO DO: store their time of last leaving
 		# TO DO: add them to members list
-		self._members_dict[memb_id] = memb_name.lower()
+		self._members_dict[memb_id] = [memb_name.lower(), memb_session_id]

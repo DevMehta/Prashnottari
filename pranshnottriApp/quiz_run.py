@@ -47,12 +47,13 @@ class MemberStats:
 		self._member_per_score_dict = member_per_score_dict_inpt
 
 class QuizRun:
-	def __init__(self, quiz_run_id_inpt, quiz_run_start_time_inpt, quiz_leaderboard_inpt, memb_stats_obj_dict_inpt, quiz_run_end_time_inpt=None):
+	def __init__(self, quiz_run_id_inpt, quiz_run_start_time_inpt, quiz_leaderboard_inpt, memb_stats_obj_dict_inpt, memb_ques_show_dict_inpt, quiz_run_end_time_inpt=None):
 		self._quiz_run_id = quiz_run_id_inpt
 		self._run_start_time = quiz_run_start_time_inpt
 		self._run_end_time = quiz_run_end_time_inpt
 		self._leaderboard = quiz_leaderboard_inpt # a sorteddict from sortedcontainers library
 		self._member_stats_obj_dict = memb_stats_obj_dict_inpt # a dict of MemberStats class objects with memb_id as key
+		self._member_ques_show_dict = memb_ques_show_dict_inpt	# a dict with key as member_ids and values as a set which contains the question ids showed so far
 
 	@property
 	def quiz_run_id(self):
@@ -108,3 +109,14 @@ class QuizRun:
 		except ValueError:
 			raise ValueError("member_stats_obj_dict has to be a dict.")
 		self._member_stats_obj_dict = member_stats_obj_dict_inpt
+
+	@property
+	def member_ques_show_dict(self):
+		return self._member_ques_show_dict
+	@member_ques_show_dict.setter
+	def member_ques_show_dict(self, member_ques_show_dict_inpt):
+		try:
+			self._member_ques_show_dict = dict(member_ques_show_dict_inpt)
+		except ValueError:
+			raise ValueError("member_ques_show_dict has to be a dict.")
+		self._member_ques_show_dict = member_ques_show_dict_inpt

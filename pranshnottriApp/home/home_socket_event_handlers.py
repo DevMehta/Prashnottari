@@ -1,4 +1,4 @@
-from flask import session, redirect, url_for, current_app
+from flask import session, redirect, url_for, current_app, request
 from flask_socketio import join_room, leave_room, send, emit
 from .. import socketio
 from threading import Thread
@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime
 from .. quiz_run import MemberStats, QuizRun
 from sortedcontainers import SortedDict
+import random
 
 '''
 Event handler for the event of creating a new quiz room.
@@ -25,7 +26,10 @@ Namespace: quiz_room_namespace
 def join_quiz_room_handler(data):
     room_code = session.get('room_code')
     user_name = session.get('user_name')
+    memb_id = session.get('memb_id')
     join_room(room_code)
+    quiz_room_obj = QuizRoomManager._quiz_room_obj_dict[room_code]
+    quiz_room_obj._members_dict[memb_id][1] = request.sid
     emit('joined_ack', {'msg': user_name + " HAS JOINED"}, namespace="/quiz_room_namespace", to=room_code)
 
 @socketio.on("disconnect", namespace='quiz_room_namespace')
@@ -57,6 +61,40 @@ def start_quiz_handler(data):
     quiz_run_setup_thrd.join()
 
     quiz_ques_lst = QuizQuestion._quiz_question_obj_dict[quiz_id]
+    no_of_ques = len(quiz_ques_lst)
+
+    '''
+    Store the session ids of all members in a dict with memb.
+    Get the sessions ids of all members
+    use that to send questions to individual members
+    per member dict is the only better soln. for that
+    '''
+    quiz_room_obj = QuizRoomManager._quiz_room_obj_dict[room_code]
+    run_id = quiz_room_obj._currnt_run_id
+    # get QuizRun object
+    quiz_run_obj = quiz_room_obj._runs_dict[run_id]
+    membs_dict = quiz_room_obj._members_dict
+
+    for memb_id_key in membs_dict.keys():
+        ques_range_obj = range(0, no_of_ques, 1)
+        ques_range_list = list(ques_range_obj)
+        random.shuffle(ques_range_list)
+        quiz_run_obj._member_ques_show_dict[memb_id_key] = ques_range_list
+
+    print(quiz_run_obj._member_ques_show_dict)
+       
+    for memb_id_key in membs_dict.keys():
+        sid = membs_dict[memb_id_key][1]
+        ques_range_list_shuffled = quiz_run_obj._member_ques_show_dict[memb_id_key]
+        socketio.start_background_task(disp_ques, current_app.app_context(), sid, ques_range_list_shuffled, quiz_ques_lst, current_app.test_request_context())
+    
+    for i in range(len(quiz_ques_lst)):
+        socketio.start_background_task(quiz_timer_func, room_code, current_app.app_context(), quiz_id)
+        socketio.sleep(11)
+        show_leaderboard_thrd = socketio.start_background_task(show_leaderboard, current_app.app_context(), room_code)
+
+
+    '''
     for i in range(len(quiz_ques_lst)):
         json_quiz_ques_msg = {
             'question_id' : quiz_ques_lst[i]._question_id,
@@ -70,7 +108,7 @@ def start_quiz_handler(data):
         emit('show_ques', json_quiz_ques_msg, namespace="/quiz_room_namespace", to=room_code)
         socketio.sleep(11)
         show_leaderboard_thrd = socketio.start_background_task(show_leaderboard, current_app.app_context(), room_code)
-    
+    '''
 def quiz_timer_func(room_code, app_cntxt, quiz_id):
     with app_cntxt:
         for i in range(10, -1, -1):
@@ -148,7 +186,7 @@ def quiz_run_setup(app_cntxt, quiz_id, room_code):
         quiz_room_obj = QuizRoomManager._quiz_room_obj_dict[room_code]
         members_dict = quiz_room_obj._members_dict
         for k in members_dict:
-            memb_name = members_dict[k]
+            memb_name = members_dict[k][0]
             memb_id = k
             member_per_ques_score_dict = {}
             member_stats_obj = MemberStats(memb_id, 0, member_per_ques_score_dict)
@@ -158,7 +196,7 @@ def quiz_run_setup(app_cntxt, quiz_id, room_code):
         run_id = str(uuid.uuid4())
         run_start_time = datetime.now()
         leaderboard_inpt = SortedDict()
-        quiz_run_obj = QuizRun(run_id, run_start_time, leaderboard_inpt, memb_stats_obj_dict)
+        quiz_run_obj = QuizRun(run_id, run_start_time, leaderboard_inpt, memb_stats_obj_dict, {})
 
 
         # set current run id
@@ -240,7 +278,7 @@ def show_leaderboard(app_cntxt, room_code):
         for score in rev_leaderboard:
             for memb_id in leaderboard[score]:
                 # get name correcponding to id
-                memb_name = quiz_room_obj._members_dict[memb_id]
+                memb_name = quiz_room_obj._members_dict[memb_id][0]
                 json_resp_msg = {
                     'memb_id' : memb_id,
                     'name' : memb_name,
@@ -248,3 +286,19 @@ def show_leaderboard(app_cntxt, room_code):
                 }
                 socketio.emit("show_leaderboard_evnt", json_resp_msg, namespace="/quiz_room_namespace", to=room_code)
         # show to users on the frontend
+
+def disp_ques(app_cntxt, user_session_id, ques_range_list_shuffled, quiz_ques_lst, req_cntxt):
+    with app_cntxt:
+        with req_cntxt:
+            print(user_session_id)
+            for i in ques_range_list_shuffled:
+                json_quiz_ques_msg = {
+                    'question_id' : quiz_ques_lst[i]._question_id,
+                    'ques_txt' : quiz_ques_lst[i]._question_text,
+                    'op1' : quiz_ques_lst[i]._op1,
+                    'op2' : quiz_ques_lst[i]._op2,
+                    'op3' : quiz_ques_lst[i]._op3,
+                    'op4' : quiz_ques_lst[i]._op4
+                }
+                emit('show_ques', json_quiz_ques_msg, namespace="/quiz_room_namespace", to=user_session_id)
+                socketio.sleep(11)
