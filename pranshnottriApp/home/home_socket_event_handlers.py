@@ -95,13 +95,15 @@ def start_quiz_handler(data):
     
     for i in range(len(quiz_ques_lst)):
         socketio.start_background_task(quiz_timer_func, room_code, current_app.app_context(), quiz_id)
-        socketio.sleep(11)
+        socketio.sleep(21)
         show_leaderboard_thrd = socketio.start_background_task(show_leaderboard, current_app.app_context(), room_code)
+
+    emit('quiz_end_evnt', {'msg':"Quiz has ended."}, namespace='/quiz_room_namespace', to=room_code)  
 
 def quiz_timer_func(room_code, app_cntxt, quiz_id):
     with app_cntxt:
-        for i in range(10, -1, -1):
-            emit('quiz_timer', {'time': i, 'quiz_id' : quiz_id}, namespace='/quiz_room_namespace', to=room_code)
+        for i in range(20, -1, -1):
+            socketio.emit('quiz_timer', {'time': i, 'quiz_id' : quiz_id}, namespace='/quiz_room_namespace', to=room_code)
             socketio.sleep(1)
 
 def set_up_question(app_cntxt, req_cntxt, quiz_id):
@@ -226,18 +228,7 @@ def resp_handler(data):
     # update scores
     positive_score = 10
     leaderboard = quiz_run_obj._leaderboard
-
-    '''
-    global first_resp_flag
-    if first_resp_flag == True:
-        first_resp_flag = False
-        all_memb_lst = []
-        membs_dict = quiz_room_obj._members_dict
-        for memb_id_vals in membs_dict.keys():
-            all_memb_lst.append(memb_id_vals)
-        leaderboard[0] = all_memb_lst
-    '''
-
+    
     if correct_ans == user_resp_option:
         prev_score = memb_stat_obj._member_total_score
         memb_stat_obj._member_total_score  += 10
@@ -294,5 +285,5 @@ def disp_ques(app_cntxt, user_session_id, ques_range_list_shuffled, quiz_ques_ls
                     'op3' : quiz_ques_lst[i]._op3,
                     'op4' : quiz_ques_lst[i]._op4
                 }
-                emit('show_ques', json_quiz_ques_msg, namespace="/quiz_room_namespace", to=user_session_ids_dict[memb_id])
-                socketio.sleep(11)
+                socketio.emit('show_ques', json_quiz_ques_msg, namespace="/quiz_room_namespace", to=user_session_ids_dict[memb_id])
+                socketio.sleep(21)

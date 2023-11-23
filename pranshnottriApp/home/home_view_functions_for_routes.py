@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, flash, redirect
+from flask import render_template, request, session, redirect, url_for, flash, redirect, current_app
 from . import home_blueprint
 from .. quiz_room_manager import QuizRoomManager
 from .. quiz_room import QuizRoom
@@ -10,6 +10,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from .. db import get_db_connection, close_db_connection
 import uuid
+from flask_socketio import close_room
+from .. import socketio
 
 quiz_room_manager_obj = QuizRoomManager()
 
@@ -106,3 +108,21 @@ def quiz_room_view_function():
 	quiz_list = sql_rest.fetchall()
 
 	return render_template("room.html", quiz_list=quiz_list)
+
+@home_blueprint.route('/quiz_room_end', methods=['GET', 'POST'])
+def quiz_room_end_handler():
+    if request.method == "POST":
+        room_code = session['room_code']
+        room_end_thrd = socketio.start_background_task(end_room_evnt_func, current_app.app_context(), room_code)
+        room_end_thrd.join()
+
+        quiz_room_manager_obj._room_codes.remove(room_code)
+        close_room(room_code, 'quiz_room_namespace')
+        
+        # delete all objects created related to quiz room  & others as well
+        session.clear()
+        return redirect(url_for('home_blueprint.home_view_function'))
+
+def end_room_evnt_func(app_cntxt, room_code):
+    with app_cntxt:
+        socketio.emit('end_redirect_evnt', {}, namespace='/quiz_room_namespace',to=room_code)
