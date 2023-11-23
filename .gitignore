@@ -6,3 +6,4 @@ pranshnottriApp/home/__pycache__/
 pranshnottriApp/quiz_run/__pycache__/
 pranshnottriApp/db.py
 *.pyc
+.gitignore
