@@ -8,12 +8,25 @@
 from datetime import datetime
 
 class QuizRoomMember:
-	def __init__(self, join_time, u_name, memb_role, memb_score=0, leave_time=None):
+	def __init__(self, member_id_inpt, join_time, u_name, memb_role, memb_score=0, leave_time=None):
+		self._member_id = member_id_inpt
 		self._member_latest_join_time = join_time
 		self._member_user_name = u_name
 		self._member_role = memb_role
 		self._member_current_total_score = memb_score
 		self._member_latest_leave_time = leave_time
+
+	@property
+	def member_id(self):
+		""""""
+		return self._member_id
+	@member_id.setter
+	def member_id(self, id_inpt):
+		try:
+			self._member_id = str(id_inpt)
+		except ValueError:
+			raise ValueError("member_id has to be a string.")
+		self._member_id = inpt_id
 
 	@property
 	def member_latest_join_time(self):

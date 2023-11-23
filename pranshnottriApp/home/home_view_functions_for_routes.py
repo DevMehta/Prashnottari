@@ -9,7 +9,7 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 from .. db import get_db_connection, close_db_connection
-
+import uuid
 
 quiz_room_manager_obj = QuizRoomManager()
 
@@ -35,6 +35,9 @@ def home_view_function():
         session['user_name'] = inpt_user_name
 
         # Create the member object
+        memb_id = str(uuid.uuid4())
+        session['memb_id'] = memb_id
+        memb_id = str(memb_id)
         memb_name = inpt_user_name
         memb_join_time = datetime.now()
         memb_role = ""
@@ -45,7 +48,7 @@ def home_view_function():
             memb_role = "creator"
             session["user_role"] = "creator"
 
-        memb_obj = QuizRoomMember(memb_join_time, memb_name, memb_role)
+        memb_obj = QuizRoomMember(memb_id, memb_join_time, memb_name, memb_role)
 
         ''' handle new room creation '''
         if create_option != False:
@@ -54,10 +57,8 @@ def home_view_function():
                 flash("Enter a room name.")
                 return render_template("home.html")
             session['disp_room_name'] = disp_room_name
-            quiz_room_obj = quiz_room_manager_obj.before_first_join_processing()
+            quiz_room_obj = quiz_room_manager_obj.before_first_join_processing(memb_id)
             quiz_room_manager_obj.add_quiz_room_obj(quiz_room_obj)
-            print(quiz_room_manager_obj._room_codes)
-            print(quiz_room_manager_obj._rooms_current_count)
             return redirect(url_for('home_blueprint.quiz_room_view_function'))
 
         ''' handle joining to an existing room '''
@@ -70,25 +71,19 @@ def home_view_function():
             if inpt_code not in quiz_room_manager_obj._room_codes:
                 # return an error that invalid quiz room code entered
                 flash("Invalid room code entered.")
-                print(quiz_room_manager_obj._room_codes)
                 return render_template("home.html", name=inpt_user_name)
             else:
                 session['room_code'] = inpt_code
                 quiz_room_obj = quiz_room_manager_obj._quiz_room_obj_dict[session['room_code']]
-                if inpt_user_name.lower() in quiz_room_obj._members_lst:
+                if inpt_user_name.lower() in quiz_room_obj._members_dict.values():
                     flash(
                         "The user name has been taken by other member of the room, Enter another")
-                    print(quiz_room_obj._members_lst)
-                    print(quiz_room_manager_obj._room_codes)
                     return render_template("home.html", name=inpt_user_name)
                 else:
                     session['disp_room_name'] = quiz_room_obj._room_name
-                    quiz_room_obj.add_member_to_room()
-                    print(quiz_room_obj._members_lst)
-                    print(quiz_room_manager_obj._room_codes)
+                    quiz_room_obj.add_member_to_room(memb_name, memb_id)
                 return redirect(url_for('home_blueprint.quiz_room_view_function'))
 
-        print(quiz_room_manager_obj._room_codes)
     return render_template("home.html")
 
 
@@ -104,6 +99,5 @@ def quiz_room_view_function():
 		print(e)
 	close_db_connection()
 	quiz_list = sql_rest.fetchall()
-	print(quiz_list)
-	
+
 	return render_template("room.html", quiz_list=quiz_list)

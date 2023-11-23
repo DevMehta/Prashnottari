@@ -48,7 +48,7 @@ class QuizRoomManager:
 	def add_quiz_room_obj(cls, obj):
 		cls._quiz_room_obj_dict[session['room_code']] = obj
 
-	def before_first_join_processing(self):
+	def before_first_join_processing(self, memb_id):
 		# increment the count of currently active quiz rooms  
 		QuizRoomManager.set_current_room_cnt(QuizRoomManager._rooms_current_count + 1)
 
@@ -75,12 +75,13 @@ class QuizRoomManager:
 		quiz_room_creation_datetime = datetime.now()
 		
 		# add the room owner to the list of members
-		member_list = []
-		member_list.append(session['user_name'].lower())
+		member_dict = {}
+		member_dict[memb_id] = session['user_name'].lower()
 		session["room_code"] = new_code
 		
 		print(new_code)
-		new_room = QuizRoom(new_room_id, room_name, member_list, quiz_room_creation_datetime, new_code)
+		runs_dict = {}
+		new_room = QuizRoom(new_room_id, room_name, member_dict, quiz_room_creation_datetime, new_code, runs_dict, "")
 		QuizRoomManager._room_codes.add(new_room.room_code)
 
 		return new_room # returns the newly created quiz room object

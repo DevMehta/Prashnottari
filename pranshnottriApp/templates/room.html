@@ -4,24 +4,28 @@
 <script type="text/javascript">
 	var socket_quiz_room_ns = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
 
-	socket_quiz_room_ns.once('connect', function () {
+	socket_quiz_room_ns.once('connect', function () 
+	{
 		socket_quiz_room_ns.emit('joined', { 'msg': 'I have joined' });
 	});
-	socket_quiz_room_ns.on('joined_ack', function (msg) {
+	socket_quiz_room_ns.on('joined_ack', function (msg) 
+	{
 		num_str = '';
 		num_str = num_str + msg.msg;
 		log_div = document.getElementById('log');
 		log_div.append(num_str);
 		log_div.append("     ")
 	});
-	socket_quiz_room_ns.on('left_room', function (msg) {
+	socket_quiz_room_ns.on('left_room', function (msg) 
+	{
 		num_str = '';
 		num_str = num_str + msg.name + msg.message;
 		log_div = document.getElementById('log');
 		log_div.append(num_str);
 		log_div.append("     ")
 	});
-	function start_quiz_event() {
+	function start_quiz_event() 
+	{
 		var e = document.getElementById("quiz_name");
 		var value = e.options[e.selectedIndex].id;
 		console.log(value);
@@ -29,15 +33,20 @@
 		select_quiz_div.style.display = "none";
 		socket_quiz_room_ns.emit('start_quiz_btn_evnt', {"inpt_quiz_id": value});
 	}
-	socket_quiz_room_ns.on('before_start_timer', function (msg_json) {
+	socket_quiz_room_ns.on('before_start_timer', function (msg_json) 
+	{
 		log2 = document.getElementById('before_start_timer_div');
 		log2.innerHTML = "";
 		log2.append("The quiz starts in: " + msg_json.time + " seconds");
 	});
-	socket_quiz_room_ns.on('disconnect', function (msg) {
+	socket_quiz_room_ns.on('disconnect', function (msg) 
+	{
 		socket_quiz_room_ns.emit('disconnect', { 'msg': 'I have left the room' });
 	});
-	socket_quiz_room_ns.on('show_ques', function (msg) {
+	socket_quiz_room_ns.on('show_ques', function (msg) 
+	{
+		var question_id_div = document.getElementsByName("question-id-div")[0];
+		question_id_div.id = msg.question_id;
 		q_text = msg.ques_txt;
 		op1 = msg.op1;
 		op2 = msg.op2;
@@ -69,18 +78,44 @@
 		op4_label = document.getElementById('op4-label');
 		op4_label.innerHTML = op4;
 	});
-	socket_quiz_room_ns.on('quiz_timer', function (msg_json) {
+	socket_quiz_room_ns.on('quiz_timer', function (msg_json) 
+	{
 		quiz_timer_div = document.getElementById('quiz_timer_div');
 		quiz_timer_div.innerHTML = "";
 		quiz_timer_div.append(msg_json.time + " seconds left.");
-		if (msg_json.time == 0) {
+		if (msg_json.time == 0) 
+		{
 			var radio_btns = document.getElementsByName('mcq-op');
-			for (let radio of radio_btns) {
-				if (radio.checked) {
-					socket_quiz_room_ns.emit('resp_evnt', { 'resp': radio.id });
+			var question_id = document.getElementsByName("question-id-div")[0];
+			for (let radio of radio_btns) 
+			{
+				if (radio.checked) 
+				{
+					socket_quiz_room_ns.emit('resp_evnt', { 'resp': radio.id, 'question_id': question_id.id, 'quiz_id' : msg_json.quiz_id});
 				}
 			}
 		}
+	});
+	socket_quiz_room_ns.on('show_leaderboard_evnt', function (msg_json)
+	{
+		var leaderboard_div = document.getElementById('leaderboard-div');
+		var leaderboard_table = document.getElementById('leaderboard-table');
+		var row_cnt = leaderboard_table.rows.length;
+
+		var old_row = document.getElementById(msg_json.memb_id);
+		if(old_row != null)
+		{
+			var old_row_idx = old_row.rowIndex;
+			leaderboard_table.deleteRow(old_row_idx);
+		}
+
+		var row = leaderboard_table.insertRow(-1);
+		row.id = msg_json.memb_id;
+		var cell_1 = row.insertCell(0);
+		var cell_2 = row.insertCell(1);
+
+		cell_1.innerHTML = msg_json.name;
+		cell_2.innerHTML = msg_json.score;
 	});
 </script>
 {% endblock %}
@@ -91,24 +126,19 @@
 <div id="log">
 </div> <!-- /#log -->
 {% if 'creator' == session['user_role'] %}
-<!---<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">
-	<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
-</form>-->
 <div id="select_quiz_div">
-	<!--<form method="POST" action="{{ url_for('home_blueprint.quiz_room_view_function') }}">-->
 		<select name="quiz_name" id="quiz_name">
 			{% for quiz in quiz_list %}
 			<option id="{{ quiz[0] }}" value="{{ quiz[0] }}">{{ quiz[1] }}</option>
 			{% endfor %}
 		</select>
 		<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
-	<!--</form>-->
 </div>
 {% endif %}
 <div id="before_start_timer_div">
 </div> <!-- /#before_start_timer_div-->
 <div id="question-show-div" hidden="true">
-	<form>
+	<div name="question-id-div">
 		<br>
 		<label id="ques-text-label"></label><br>
 		<input type="radio" name="mcq-op" id="op1" value="">
@@ -119,9 +149,18 @@
 		<label id="op3-label" for="op3"></label><br>
 		<input type="radio" name="mcq-op" id="op4" value="">
 		<label id="op4-label" for="op4"></label><br>
-	</form>
+	</div>
 </div><!-- /#question_show_div -->
 <br>
 <div id="quiz_timer_div">
-</div> <!-- /#quiz_timer_div-->
+</div> <!-- /#quiz_timer_div -->
+<div id="leaderboard-div">
+	<h3>Leaderboard</h3>
+	<table id="leaderboard-table">
+		<thead>
+			<th>Name</th>
+			<th>Total Score</th>
+		</thead>
+	</table>
+</div> <!-- /#leaderboard-div -->
 {% endblock %}
