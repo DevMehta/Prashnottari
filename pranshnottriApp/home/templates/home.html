@@ -1,29 +1,32 @@
 {% extends 'base.html' %}
 {% block content %}
 <header>
-    <h1>प्रश्नोत्तरी</h1>
+	<h1>प्रश्नोत्तरी</h1>
+	<link rel="stylesheet" href="{{url_for('static', filename='css/home.css')}}">
 </header>
 <form method="POST" action="{{ url_for('home_blueprint.home_view_function') }}">
-	<label for="user-name-inpt">Enter a user name:</label>
-	<input type="text" name="user-name-inpt">
-	<div id="create-new-quiz-room-div">
-		<h3>CREATE A NEW QUIZ ROOM</h3>
-		<label for="room-name-inpt">Enter a name for the room:</label>
-		<input type="text" name="room-name-inpt">
-		<br>
-		<button name="create-btn">Create Room</button>
-	</div>
-	<h2>OR</h2>
-	<div id="join-a-quiz-room-div">
-		<h3>JOIN AN EXISTING QUIZ ROOM WITH A 5 DIGIT CODE</h3>
-		<label for="code-inpt">Enter a 5 digit code:</label>
-		<input type="text" name="code-inpt"><br>
-		<button name="join-btn">Join Room</button>
-	</div>
-	<h2>OR</h2>
-	<div id="create-a-new-quiz">
-		<h3>CREATE A NEW QUIZ</h3>
-		<button name="create-quiz-btn">Create Quiz</button>
+	<div class="container">
+		<label for="user-name-inpt">Enter a user name:</label>
+		<input type="text" name="user-name-inpt">
+		<div id="create-new-quiz-room-div">
+			<h3>CREATE A NEW QUIZ ROOM</h3>
+			<label for="room-name-inpt">Enter a name for the room:</label>
+			<input type="text" name="room-name-inpt">
+			<br>
+			<button name="create-btn">Create Room</button>
+		</div>
+		<hr>
+		<div id="join-a-quiz-room-div">
+			<h3>JOIN AN EXISTING QUIZ ROOM WITH A 5 DIGIT CODE</h3>
+			<label for="code-inpt">Enter a 5 digit code:</label>
+			<input type="text" name="code-inpt"><br>
+			<button name="join-btn">Join Room</button>
+		</div>
+		<hr>
+		<div id="create-a-new-quiz">
+			<h3>CREATE A NEW QUIZ</h3>
+			<button name="create-quiz-btn">Create Quiz</button>
+		</div>
 	</div>
 </form>
 {% endblock %}
