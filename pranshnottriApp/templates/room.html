@@ -41,9 +41,12 @@
 		log2.innerHTML = "";
 		log2.append("The quiz starts in: " + msg_json.time + " seconds");
 	});
-	socket_quiz_room_ns.on('disconnect', function (msg) {
+	/*
+	socket_quiz_room_ns.on('disconnect', function (msg) 
+	{
 		socket_quiz_room_ns.emit('disconnect', { 'msg': 'I have left the room' });
 	});
+	*/
 	socket_quiz_room_ns.on('show_ques', function (msg) {
 		var question_id_div = document.getElementsByName("question-id-div")[0];
 		question_id_div.id = msg.question_id;
@@ -116,6 +119,20 @@
 		cell_1.innerHTML = msg_json.name;
 		cell_2.innerHTML = msg_json.score;
 	});
+	socket_quiz_room_ns.on('quiz_end_evnt', function (msg_json) {
+		question_show_div = document.getElementById('question-show-div');
+		quiz_timer_div = document.getElementById('quiz_timer_div');
+		question_show_div.innerHTML = "";
+		quiz_timer_div.innerHTML = "";
+		end_div = document.getElementById('end-div');
+		if (end_div != null) {
+			end_div.innerHTML += "<h3>The quiz has ended.</h3>";
+			end_div.hidden = false;
+		}
+	});
+	socket_quiz_room_ns.on('end_redirect_evnt', function (msg_json) {
+		window.location.replace("http://127.0.0.1:5000/");
+	});
 </script>
 {% endblock %}
 {% block content %}
@@ -128,48 +145,24 @@
 		<div id="log">
 		</div> <!-- /#log -->
 	</div>
-	<hr>
-	<div id="main_div">
-		{% if 'creator' == session['user_role'] %}
-		<div id="select_quiz_div">
-			<select name="quiz_name" id="quiz_name">
-				{% for quiz in quiz_list %}
-				<option id="{{ quiz[0] }}" value="{{ quiz[0] }}">{{ quiz[1] }}</option>
-				{% endfor %}
-			</select>
-			<br>
-			<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
-		</div>
-		{% endif %}
-		<div id="before_start_timer_div">
-		</div> <!-- /#before_start_timer_div-->
-		<div id="question-show-div" hidden="true">
-			<div name="question-id-div">
-				<br>
-				<label id="ques-text-label"></label><br>
-				<input type="radio" name="mcq-op" id="op1" value="">
-				<label id="op1-label" for="op1"></label><br>
-				<input type="radio" name="mcq-op" id="op2" value="">
-				<label id="op2-label" for="op2"></label><br>
-				<input type="radio" name="mcq-op" id="op3" value="">
-				<label id="op3-label" for="op3"></label><br>
-				<input type="radio" name="mcq-op" id="op4" value="">
-				<label id="op4-label" for="op4"></label><br>
-			</div>
-		</div><!-- /#question_show_div -->
-		<br>
-		<div id="quiz_timer_div">
-		</div> <!-- /#quiz_timer_div -->
-	</div>
-	<hr>
-	<div id="leaderboard-div" hidden="true">
-		<h3>Leaderboard</h3>
-		<table id="leaderboard-table">
-			<thead>
-				<th>Name</th>
-				<th>Total Score</th>
-			</thead>
-		</table>
-	</div> <!-- /#leaderboard-div -->
-</div> <!-- /#room_div -->
+</div><!-- /#question_show_div -->
+<br>
+<div id="quiz_timer_div">
+</div> <!-- /#quiz_timer_div -->
+<div id="leaderboard-div" hidden=true>
+	<h3>Leaderboard</h3>
+	<table id="leaderboard-table">
+		<thead>
+			<th>Name</th>
+			<th>Total Score</th>
+		</thead>
+	</table>
+</div> <!-- /#leaderboard-div -->
+{% if 'creator' == session['user_role'] %}
+<div id="end-div" hidden=true>
+	<form method="POST" action="{{ url_for('home_blueprint.quiz_room_end_handler') }}">
+		<button type="submit">End Room</button>
+	</form>
+</div>
+{% endif %}
 {% endblock %}
