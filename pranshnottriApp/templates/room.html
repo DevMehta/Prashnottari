@@ -145,19 +145,49 @@
 		<div id="log">
 		</div> <!-- /#log -->
 	</div>
-</div><!-- /#question_show_div -->
-<br>
-<div id="quiz_timer_div">
-</div> <!-- /#quiz_timer_div -->
-<div id="leaderboard-div" hidden=true>
-	<h3>Leaderboard</h3>
-	<table id="leaderboard-table">
-		<thead>
-			<th>Name</th>
-			<th>Total Score</th>
-		</thead>
-	</table>
-</div> <!-- /#leaderboard-div -->
+	<hr>
+	<div id="main_div">
+		{% if 'creator' == session['user_role'] %}
+		<div id="select_quiz_div">
+			<select name="quiz_name" id="quiz_name">
+				{% for quiz in quiz_list %}
+				<option id="{{ quiz[0] }}" value="{{ quiz[0] }}">{{ quiz[1] }}</option>
+				{% endfor %}
+			</select>
+			<br>
+			<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
+		</div>
+		{% endif %}
+		<div id="before_start_timer_div">
+		</div> <!-- /#before_start_timer_div-->
+		<div id="question-show-div" hidden="true">
+			<div name="question-id-div">
+				<br>
+				<label id="ques-text-label"></label><br>
+				<input type="radio" name="mcq-op" id="op1" value="">
+				<label id="op1-label" for="op1"></label><br>
+				<input type="radio" name="mcq-op" id="op2" value="">
+				<label id="op2-label" for="op2"></label><br>
+				<input type="radio" name="mcq-op" id="op3" value="">
+				<label id="op3-label" for="op3"></label><br>
+				<input type="radio" name="mcq-op" id="op4" value="">
+				<label id="op4-label" for="op4"></label><br>
+			</div>
+		</div><!-- /#question_show_div -->
+		<div id="quiz_timer_div">
+		</div> <!-- /#quiz_timer_div -->
+	</div>
+	<hr>
+	<div id="leaderboard-div" hidden=true>
+		<h3>Leaderboard</h3>
+		<table id="leaderboard-table">
+			<thead>
+				<th>Name</th>
+				<th>Total Score</th>
+			</thead>
+		</table>
+	</div> <!-- /#leaderboard-div -->
+</div>
 {% if 'creator' == session['user_role'] %}
 <div id="end-div" hidden=true>
 	<form method="POST" action="{{ url_for('home_blueprint.quiz_room_end_handler') }}">
