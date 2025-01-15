@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+pranshnottriApp/__pycache__/
+pranshnottriApp/create_quiz/__pycache__/
+pranshnottriApp/home/__pycache__/
+pranshnottriApp/quiz_run/__pycache__/
+pranshnottriApp/db.py
+*.pyc
+.gitignore

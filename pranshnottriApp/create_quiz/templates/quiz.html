@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/quiz.css')}}">
+
+</head>
+
+<body>
+    <h1>Create Quiz</h1>
+    <hr>
+    <div id="main_div">
+        <form method="POST" action="{{ url_for('create_quiz_blueprint.create_quiz_function') }}">
+            <div id="create_quiz">
+                <label for="quiz_name">Quiz Name:</label>
+                <input type="text" name="quiz_name" required>
+                <label for="quiz_category">Quiz Category:</label>
+                <input type="text" name="quiz_category" required>
+                {% set Questionid = namespace(value=2001) %}
+                {% for Object in range(1, question_count + 1) %}
+                <div class="question">
+                    <h2>Question {{ Object }}</h2>
+                    {% set Questionid.value = Questionid.value + 1 %}
+                    <input type="hidden" name="question_id" value="{{Questionid.value}}">
+                    <input type="text" name="question_text" size="100" placeholder="Enter your question"
+                        value="{{Object.question_text}}">
+                    <h3>Options</h3>
+                    <div class="options">
+                        {% for option_num in range(1, 5) %}
+                        <label> Option{{ option_num }} </label>
+                        <input type="text" name="op{{ option_num }}" placeholder="Option"
+                            value="{{Object.option_num }}">
+                        {% endfor %}
+                    </div>
+                    <label> Correct Answer: </label>
+                    <input type="number" name="correct_ans" placeholder="correct_answer" value="{{Object.correct_ans}}"
+                        min="1" max="4">
+                </div>
+                {% endfor %}
+            </div>
+            <br>
+            <hr>
+            <button type="button" onclick="addQuestion()">Add Question</button>
+            <button name="submit_quiz">Submit Quiz</button>
+        </form>
+
+        <script>
+
+            // define a global variable to store the number of questions
+            var questionCount = {{ question_count }};;
+
+            // define a function to add a new question to the form
+            function addQuestion() {
+                // increment the question count
+                questionCount++;
+
+                // create a new div element to hold the question
+                let questionDiv = document.createElement("div");
+                questionDiv.className = "question";
+                questionDiv.id = "question" + questionCount;
+
+                // create a heading element to display the question number
+                let questionHeading = document.createElement("h2");
+                questionHeading.textContent = "Question " + questionCount;
+
+                // create a hidden input element to store the question id
+                let questionId = document.createElement("input");
+                questionId.type = "hidden";
+                questionId.name = "question_id";
+                questionId.value = 2000 + questionCount;
+
+                // create a text input element to enter the question text
+                let questionText = document.createElement("input");
+                questionText.type = "text";
+                questionText.name = "question_text";
+                questionText.size = "100";
+                questionText.placeholder = "Enter your question";
+
+                // create a heading element to display the options
+                let optionsHeading = document.createElement("h3");
+                optionsHeading.textContent = "Options";
+
+                // create a div element to hold the options
+                let optionsDiv = document.createElement("div");
+                optionsDiv.className = "options";
+
+                // create four text input elements for the options
+                for (let i = 1; i <= 4; i++) {
+                    // create a label element for the option number
+                    let optionLabel = document.createElement("label");
+                    optionLabel.textContent = "Option" + i;
+
+                    // create a text input element for the option text
+                    let optionText = document.createElement("input");
+                    optionText.type = "text";
+                    optionText.name = "op" + i;
+                    optionText.placeholder = "Option";
+
+                    // append the label and the input elements to the options div
+                    optionsDiv.appendChild(optionLabel);
+                    optionsDiv.appendChild(optionText);
+                }
+
+                // create a label element for the correct answer
+                let correctAnswerLabel = document.createElement("label");
+                correctAnswerLabel.textContent = "Correct Answer:";
+
+                // create a number input element for the correct answer
+                let correctAnswerInput = document.createElement("input");
+                correctAnswerInput.type = "number";
+                correctAnswerInput.name = "correct_ans";
+                correctAnswerInput.placeholder = "correct_answer";
+                correctAnswerInput.min = "1";
+                correctAnswerInput.max = "4";
+
+                // append all the elements to the question div
+                questionDiv.appendChild(questionHeading);
+                questionDiv.appendChild(questionId);
+                questionDiv.appendChild(questionText);
+                questionDiv.appendChild(optionsHeading);
+                questionDiv.appendChild(optionsDiv);
+                questionDiv.appendChild(correctAnswerLabel);
+                questionDiv.appendChild(correctAnswerInput);
+
+                // append the question div to the form element
+                let formElement = document.getElementById("create_quiz");
+                formElement.appendChild(questionDiv);
+
+            }
+
+
+        </script>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,129 @@
+body {
+    background-color: #f2f2f2;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#main_div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+}
+
+#create_quiz {
+    display: inline-block;
+    width: 900px;
+    margin-bottom: 30px;
+    border-left: #8D0200 3px double;
+    border-right: #8D0200 3px double;
+    padding: 5px 30px 5px 30px;
+}
+
+label {
+    text-align: left;
+}
+
+h1 {
+    text-align: center;
+    color: #8D0200;
+}
+
+hr {
+    width: 20%;
+    height: 2px;
+    background-color: #8D0200;
+    border: none;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+form hr {
+    width: 40%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+form {
+    margin-top: 20px;
+}
+
+/* Question Styles */
+.question {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+h2 {
+    text-align: left;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+h3 {
+    text-align: left;
+    margin-top: 10px;
+    color: #555;
+}
+
+.options {
+    margin-bottom: 10px;
+    margin-left: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+    /* Added */
+}
+
+button {
+    padding: 15px 20px;
+    margin-top: 30px;
+    /* Google Blue */
+    color: #8D0200;
+    border-color: #8D0200;
+    border-radius: 10px;
+    cursor: pointer;
+    outline: none;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #8D0200;
+    color: #fff;
+    /* Darker Google Blue */
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .container {
+        max-width: 100%;
+        padding: 10px;
+    }
+}

@@ -1,0 +1,198 @@
+<head>
+	<link rel="stylesheet" href="{{url_for('static', filename='css/room.css')}}">
+</head>
+
+{% extends 'base.html' %}
+{% block head %}
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+	var socket_quiz_room_ns = io.connect("http://127.0.0.1:5000" + '/quiz_room_namespace');
+
+	/*
+	socket_quiz_room_ns.once('connect', function () 
+	{
+		socket_quiz_room_ns.emit('joined', { 'msg': 'I have joined' });
+	});
+	*/
+	socket_quiz_room_ns.on('joined_ack', function (msg) {
+		num_str = '';
+		num_str = num_str + msg.msg;
+		log_div = document.getElementById('log');
+		log_div.append(num_str);
+		log_div.append("     ")
+	});
+	socket_quiz_room_ns.on('left_room', function (msg) {
+		num_str = '';
+		num_str = num_str + msg.name + msg.message;
+		log_div = document.getElementById('log');
+		log_div.append(num_str);
+		log_div.append("     ")
+	});
+	function start_quiz_event() {
+		var e = document.getElementById("quiz_name");
+		var value = e.options[e.selectedIndex].id;
+		console.log(value);
+		select_quiz_div = document.getElementById("select_quiz_div");
+		select_quiz_div.style.display = "none";
+		socket_quiz_room_ns.emit('start_quiz_btn_evnt', { "inpt_quiz_id": value });
+	}
+	socket_quiz_room_ns.on('before_start_timer', function (msg_json) {
+		log2 = document.getElementById('before_start_timer_div');
+		log2.innerHTML = "";
+		log2.append("The quiz starts in: " + msg_json.time + " seconds");
+	});
+	/*
+	socket_quiz_room_ns.on('disconnect', function (msg) 
+	{
+		socket_quiz_room_ns.emit('disconnect', { 'msg': 'I have left the room' });
+	});
+	*/
+	socket_quiz_room_ns.on('show_ques', function (msg) {
+		var question_id_div = document.getElementsByName("question-id-div")[0];
+		question_id_div.id = msg.question_id;
+		q_text = msg.ques_txt;
+		op1 = msg.op1;
+		op2 = msg.op2;
+		op3 = msg.op3;
+		op4 = msg.op4;
+		log2 = document.getElementById('before_start_timer_div');
+		log2.innerHTML = "";
+		question_show_div = document.getElementById('question-show-div');
+		question_show_div.hidden = false;
+		question_label = document.getElementById('ques-text-label');
+		question_label.innerHTML = q_text;
+		op1_inpt = document.getElementById('op1');
+		op1_inpt.value = op1;
+		op1_inpt.checked = false;
+		op1_label = document.getElementById('op1-label');
+		op1_label.innerHTML = op1;
+
+		op2_inpt = document.getElementById('op2');
+		op2_inpt.value = op2;
+		op2_inpt.checked = false;
+		op2_label = document.getElementById('op2-label');
+		op2_label.innerHTML = op2;
+
+		op3_inpt = document.getElementById('op3');
+		op3_inpt.value = op3;
+		op3_inpt.checked = false;
+		op3_label = document.getElementById('op3-label');
+		op3_label.innerHTML = op3;
+
+		op4_inpt = document.getElementById('op4');
+		op4_inpt.value = op4;
+		op4_inpt.checked = false;
+		op4_label = document.getElementById('op4-label');
+		op4_label.innerHTML = op4;
+	});
+	socket_quiz_room_ns.on('quiz_timer', function (msg_json) {
+		quiz_timer_div = document.getElementById('quiz_timer_div');
+		quiz_timer_div.innerHTML = "";
+		quiz_timer_div.append(msg_json.time + " seconds left.");
+		if (msg_json.time == 0) {
+			var radio_btns = document.getElementsByName('mcq-op');
+			var question_id = document.getElementsByName("question-id-div")[0];
+			for (let radio of radio_btns) {
+				if (radio.checked) {
+					socket_quiz_room_ns.emit('resp_evnt', { 'resp': radio.id, 'question_id': question_id.id, 'quiz_id': msg_json.quiz_id });
+				}
+			}
+		}
+	});
+	socket_quiz_room_ns.on('show_leaderboard_evnt', function (msg_json) {
+		var leaderboard_div = document.getElementById('leaderboard-div');
+		leaderboard_div.hidden = false;
+		var leaderboard_table = document.getElementById('leaderboard-table');
+		var row_cnt = leaderboard_table.rows.length;
+
+		var old_row = document.getElementById(msg_json.memb_id);
+		if (old_row != null) {
+			var old_row_idx = old_row.rowIndex;
+			leaderboard_table.deleteRow(old_row_idx);
+		}
+
+		var row = leaderboard_table.insertRow(-1);
+		row.id = msg_json.memb_id;
+		var cell_1 = row.insertCell(0);
+		var cell_2 = row.insertCell(1);
+
+		cell_1.innerHTML = msg_json.name;
+		cell_2.innerHTML = msg_json.score;
+	});
+	socket_quiz_room_ns.on('quiz_end_evnt', function (msg_json) {
+		question_show_div = document.getElementById('question-show-div');
+		quiz_timer_div = document.getElementById('quiz_timer_div');
+		question_show_div.innerHTML = "";
+		quiz_timer_div.innerHTML = "";
+		end_div = document.getElementById('end-div');
+		if (end_div != null) {
+			end_div.innerHTML += "<h3>The quiz has ended.</h3>";
+			end_div.hidden = false;
+		}
+	});
+	socket_quiz_room_ns.on('end_redirect_evnt', function (msg_json) {
+		window.location.replace("http://127.0.0.1:5000/");
+	});
+</script>
+{% endblock %}
+{% block content %}
+<div id="room_div">
+	<div id="roomInfo">
+		<h1>Welcome to quiz room: {{ session['disp_room_name'] }}</h1>
+		<h3>User Name: {{ session['user_name'] }}</h3>
+		<h3>Share this code with others to join the room: {{ session['room_code'] }}</h3>
+		<h3 id="disp"></h3>
+		<div id="log">
+		</div> <!-- /#log -->
+	</div>
+	<hr>
+	<div id="main_div">
+		{% if 'creator' == session['user_role'] %}
+		<div id="select_quiz_div">
+			<select name="quiz_name" id="quiz_name">
+				{% for quiz in quiz_list %}
+				<option id="{{ quiz[0] }}" value="{{ quiz[0] }}">{{ quiz[1] }}</option>
+				{% endfor %}
+			</select>
+			<br>
+			<button id="start_quiz_btn" onclick="start_quiz_event()">Start Quiz</button>
+		</div>
+		{% endif %}
+		<div id="before_start_timer_div">
+		</div> <!-- /#before_start_timer_div-->
+		<div id="question-show-div" hidden="true">
+			<div name="question-id-div">
+				<br>
+				<label id="ques-text-label"></label><br>
+				<input type="radio" name="mcq-op" id="op1" value="">
+				<label id="op1-label" for="op1"></label><br>
+				<input type="radio" name="mcq-op" id="op2" value="">
+				<label id="op2-label" for="op2"></label><br>
+				<input type="radio" name="mcq-op" id="op3" value="">
+				<label id="op3-label" for="op3"></label><br>
+				<input type="radio" name="mcq-op" id="op4" value="">
+				<label id="op4-label" for="op4"></label><br>
+			</div>
+		</div><!-- /#question_show_div -->
+		<div id="quiz_timer_div">
+		</div> <!-- /#quiz_timer_div -->
+	</div>
+	<hr>
+	<div id="leaderboard-div" hidden=true>
+		<h3>Leaderboard</h3>
+		<table id="leaderboard-table">
+			<thead>
+				<th>Name</th>
+				<th>Total Score</th>
+			</thead>
+		</table>
+	</div> <!-- /#leaderboard-div -->
+</div>
+{% if 'creator' == session['user_role'] %}
+<div id="end-div" hidden=true>
+	<form method="POST" action="{{ url_for('home_blueprint.quiz_room_end_handler') }}">
+		<button type="submit">End Room</button>
+	</form>
+</div>
+{% endif %}
+{% endblock %}
